@@ -1,0 +1,4 @@
+#!/bin/bash -ex
+
+git clone --depth=1 --branch dev https://github.com/Gallopsled/pwntools.git
+PIP_VENV=ctftools manage pip install -U --upgrade 'git+https://github.com/Gallopsled/pwntools.git@dev'

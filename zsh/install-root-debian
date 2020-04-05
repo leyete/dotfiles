@@ -1,0 +1,5 @@
+#!/bin/bash -ex
+set -eu -o pipefail
+
+DEBIAN_FRONTEND=noninteractive apt-get update -q -y
+DEBIAN_FRONTEND=noninteractive apt-get install -q -y zsh

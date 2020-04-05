@@ -1,0 +1,6 @@
+#!/bin/bash -ex
+set -eu -o pipefail
+
+DEBIAN_FRONTEND=noninteractive apt-get -y -q update
+DEBIAN_FRONTEND=noninteractive apt-get -y -q install libevent-dev libncursesw5-dev \
+    libutempter-dev

@@ -1,0 +1,3 @@
+#!/bin/bash -ex
+
+PIP_ENV=ctftools manage pip uninstall -y pwntools || true

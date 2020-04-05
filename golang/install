@@ -1,0 +1,39 @@
+#!/bin/bash -ex
+set -eu -o pipefail
+
+find_latest_go_release()
+{
+    git ls-remote --tags git://github.com/golang/go.git | grep -v 'weekly\|rc\|beta' \
+        | grep -v 'weekly\|rc\|beta' \
+        | grep -oh 'go[0-9]\{1,2\}\.[0-9]\{1,2\}\([0-9]\{1,2\}\)\?' \
+        | sort --version-sort -r \
+        | head -n 1
+}
+
+VERSION=$(find_latest_go_release)
+curl -sSLO "https://dl.google.com/go/${VERSION}.linux-amd64.tar.gz"
+
+# delete old go dir, if any (update method)
+set +e
+rm -rf go 2>/dev/null
+set -e
+
+tar -xzf "${VERSION}.linux-amd64.tar.gz"
+rm -rf "${VERSION}.linux-amd64.tar.gz"
+
+# add required environment variables
+ENV_FILE="$PWD/../zsh/oh-my-zsh/custom/environment.zsh"
+if [ -d "$(dirname $ENV_FILE)" ]; then
+    MAGIC="# golang: environment variables and PATH"
+    if ! grep "$MAGIC" "$ENV_FILE" >/dev/null 2>&1; then
+        cat >> "$ENV_FILE" << EOF
+
+$MAGIC
+export GOROOT=$PWD/go
+export GOPATH=\${HOME}/go
+export GOBIN=\${GOPATH}/bin
+export PATH="\${PATH}:\${GOROOT}/bin:\${GOBIN}"
+
+EOF
+    fi
+fi

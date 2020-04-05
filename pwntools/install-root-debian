@@ -1,0 +1,4 @@
+#!/bin/bash -ex
+
+DEBIAN_FRONTEND=noninteractive apt-get update -y -q
+DEBIAN_FRONTEND=noninteractive apt-get install -y -q libssl-dev libffi-dev build-essential

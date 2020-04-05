@@ -1,0 +1,72 @@
+#!/bin/bash -ex
+set -eu -o pipefail
+
+function install_oh_my_zsh()
+{
+    # download the install script
+    if type curl >/dev/null 2>&1; then
+        curl -fsSLO https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    elif type wget >/dev/null 2>&1; then
+        wget -qO install.sh https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    else
+        echo "ERROR: either curl or wget are needed to download oh-my-zsh install script"
+        exit 1
+    fi
+
+    ZSH="$PWD/oh-my-zsh" sh install.sh --unattended
+
+    # clean-up
+    rm -f install.sh
+}
+
+function install_powerlevel10k()
+{
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$PWD/oh-my-zsh/custom/themes/powerlevel10k"
+}
+
+
+install_oh_my_zsh
+install_powerlevel10k
+
+# link the appropriate prompt
+set +e
+dotlink -o "$PWD/data/prompt-${DISTRIB}.zsh" "$PWD/oh-my-zsh/custom/prompt.zsh"
+set -e
+
+# set-up the zshrc file
+cd ..
+cat > ~/.zshrc << EOF
+# vim:ft=zsh ts=2 sw=2 sts=2 et fenc=utf-8
+
+## zshrc - ZSH configuration file.
+
+# --------------------------------------------------------------------
+# OH-MY-ZSH installation
+
+export ZSH=$OLDPWD/oh-my-zsh
+
+export PATH=$PWD/bin:$PATH
+
+# --------------------------------------------------------------------
+# THEME and PLUGINS
+
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+plugins=(
+  git
+)
+
+# --------------------------------------------------------------------
+# LOAD OH-MY-ZSH
+
+source "\$ZSH/oh-my-zsh.sh"
+
+# --------------------------------------------------------------------
+# DIR COLORS
+
+eval \`dircolors "$OLDPWD/data/dircolors.256dark"\`
+zstyle ':completion:*:default' list-colors \${(s.:.)LS_COLORS}
+autoload -Uz compinit
+compinit
+EOF
+cd -

@@ -1,0 +1,52 @@
+#!/bin/bash -ex
+set -eu -o pipefail
+
+function find_latest_python_version()
+{
+    git ls-remote --tags git://github.com/python/cpython.git \
+    | grep -v '\.[0-9]\{1,2\}\(a[0-9]\+\|b\|rc\)' \
+    | grep -oh 'v[0-9]\{1,2\}\.[0-9]\{1,2\}\(\.[0-9]\{1,2\}\)\?' \
+    | sort --version-sort -r \
+    | head -n 1
+}
+
+VERSION=$(find_latest_python_version)
+git clone https://github.com/python/cpython.git
+
+cd cpython
+git checkout "$VERSION"
+
+./configure --prefix="$OLDPWD/$VERSION"
+make
+make install
+
+# make the bin and share directories available
+cd ..
+ln -sf "$VERSION/bin" .
+ln -sf "$VERSION/share" .
+
+# install virtualenvwrapper
+cd bin
+./python3 -m pip install virtualenvwrapper
+cd ..
+
+# alias to load virtualenvwrapper.sh
+cd ..
+ZSH="$PWD/zsh/oh-my-zsh"
+if [[ -d "$ZSH" ]]; then
+    MAGIC="# venvwrap: function to source virtualenvwrapper.sh"
+    if ! grep "$MAGIC" "$ZSH/custom/aliases.zsh"; then
+        cat >> "$ZSH/custom/aliases.zsh" <<EOF
+$MAGIC
+function venvwrap()
+{
+    export WORKON_HOME="$PWD/python/.virtualenvs"
+    source $PWD/bin/virtualenvwrapper.sh
+}
+
+EOF
+    fi
+fi
+cd -
+
+rm -rf cpython
