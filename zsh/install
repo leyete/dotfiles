@@ -45,7 +45,7 @@ cat > ~/.zshrc << EOF
 
 export ZSH=$OLDPWD/oh-my-zsh
 
-export PATH=$PWD/bin:$PATH
+export PATH="$PWD/bin:\$PATH"
 
 # --------------------------------------------------------------------
 # THEME and PLUGINS

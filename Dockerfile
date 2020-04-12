@@ -25,12 +25,12 @@ COPY .git /home/ctf/tools/.git
 WORKDIR /home/ctf/tools
 RUN git checkout .
 
-COPY bin/manage /home/ctf/tools/manage
+COPY bin/manage /home/ctf/tools/bin/manage
 RUN chown -R ctf:ctf /home/ctf/tools
 
 USER ctf
 ARG TOOLS
 ENV PATH="/home/ctf/tools/bin:${PATH}"
-RUN bin/manage -S install zsh python golang $TOOLS
+RUN manage -S install zsh python golang $TOOLS
 
 WORKDIR /home/ctf
